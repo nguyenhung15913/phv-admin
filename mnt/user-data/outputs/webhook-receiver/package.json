@@ -7,7 +7,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "npm install",
+    "build": "npm install --legacy-peer-deps",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
