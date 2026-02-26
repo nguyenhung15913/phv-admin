@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Pho Huong Viet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink:        #0d0b08;
+      --paper:      #f5f0e8;
+      --ember:      #c8421a;
+      --gold:       #d4a843;
+      --mist:       #8b8070;
+      --smoke:      #1e1a14;
+      --warm-white: #faf7f2;
+      --card:       #161210;
+      --border:     rgba(212,168,67,0.15);
+      --green:      #4caf78;
+      --blue:       #5b9bd5;
+      --orange:     #e8943a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--ink);
+      color: var(--paper);
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      background: rgba(13,11,8,0.97);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+    }
+
+    .logo span {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--mist);
+      text-transform: uppercase;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mist);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .live-dot.offline { background: var(--ember); animation: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      gap: 2px;
+      padding: 0 2rem;
+      margin: 2rem 0 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-top: 0.3rem;
+    }
+
+    /* ─── FILTERS ─── */
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0 2rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-right: 0.5rem;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--mist);
+      padding: 0.35rem 1rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212,168,67,0.05);
+    }
+
+    /* ─── ORDERS GRID ─── */
+    .orders-wrap { padding: 0 2rem 3rem; }
+
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--mist);
+    }
+
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    .empty-state p {
+      font-size: 1rem;
+      font-style: italic;
+      line-height: 1.7;
+    }
+
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ─── ORDER CARD ─── */
+    .order-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      position: relative;
+      animation: slideIn 0.4s ease both;
+      transition: border-color 0.3s;
+    }
+
+    .order-card.status-new       { border-left: 3px solid var(--ember); }
+    .order-card.status-preparing { border-left: 3px solid var(--orange); }
+    .order-card.status-ready     { border-left: 3px solid var(--green); }
+    .order-card.status-picked_up { border-left: 3px solid var(--mist); opacity: 0.6; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .order-id {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+    }
+
+    .order-time {
+      font-size: 0.7rem;
+      color: var(--mist);
+      font-style: italic;
+    }
+
+    .status-badge {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 2px;
+    }
+
+    .status-badge.new        { background: rgba(200,66,26,0.15); color: var(--ember); border: 1px solid rgba(200,66,26,0.3); }
+    .status-badge.preparing  { background: rgba(232,148,58,0.15); color: var(--orange); border: 1px solid rgba(232,148,58,0.3); }
+    .status-badge.ready      { background: rgba(76,175,120,0.15); color: var(--green); border: 1px solid rgba(76,175,120,0.3); }
+    .status-badge.picked_up  { background: rgba(139,128,112,0.1); color: var(--mist); border: 1px solid rgba(139,128,112,0.2); }
+
+    .customer-info {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .customer-name {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.1rem;
+      color: var(--warm-white);
+      margin-bottom: 0.2rem;
+    }
+
+    .customer-detail {
+      font-size: 0.8rem;
+      color: var(--mist);
+      line-height: 1.7;
+    }
+
+    .customer-detail a {
+      color: var(--mist);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .customer-detail a:hover { color: var(--gold); }
+
+    .order-items { margin-bottom: 1rem; }
+
+    .order-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--paper);
+      line-height: 1.8;
+      gap: 0.5rem;
+    }
+
+    .order-item-name { flex: 1; color: rgba(245,240,232,0.8); }
+    .order-item-qty  { color: var(--mist); }
+    .order-item-sub  { color: var(--gold); font-family: 'Shippori Mincho', serif; }
+
+    .order-totals {
+      border-top: 1px solid var(--border);
+      padding-top: 0.7rem;
+      margin-bottom: 1rem;
+    }
+
+    .order-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--mist);
+      line-height: 1.9;
+    }
+
+    .order-total-row.grand {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1rem;
+      color: var(--warm-white);
+    }
+
+    .order-notes {
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--mist);
+      background: rgba(212,168,67,0.04);
+      border-left: 2px solid rgba(212,168,67,0.2);
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    /* ─── STATUS BUTTONS ─── */
+    .status-actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .status-action-btn {
+      flex: 1;
+      padding: 0.45rem 0.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--mist);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .status-action-btn:hover          { border-color: var(--gold); color: var(--gold); }
+    .status-action-btn.active-btn     { background: var(--ember); border-color: var(--ember); color: white; }
+    .status-action-btn.active-orange  { background: var(--orange); border-color: var(--orange); color: white; }
+    .status-action-btn.active-green   { background: var(--green); border-color: var(--green); color: white; }
+    .status-action-btn.active-grey    { background: var(--mist); border-color: var(--mist); color: var(--ink); }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--card);
+      border: 1px solid var(--gold);
+      color: var(--warm-white);
+      padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+      max-width: 320px;
+      z-index: 999;
+      display: none;
+      animation: toastIn 0.3s ease;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast-title {
+      font-family: 'Shippori Mincho', serif;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      PHO HUONG VIET
+      <span>Order Admin Dashboard</span>
+    </div>
+    <div class="live-indicator">
+      <div class="live-dot" id="liveDot"></div>
+      <span id="liveStatus">Connecting...</span>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statNew" style="color:var(--ember)">0</div>
+      <div class="stat-label">New</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statPreparing" style="color:var(--orange)">0</div>
+      <div class="stat-label">Preparing</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statReady" style="color:var(--green)">0</div>
+      <div class="stat-label">Ready</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statRevenue">$0</div>
+      <div class="stat-label">Revenue Today</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('new', this)">New</button>
+    <button class="filter-btn" onclick="setFilter('preparing', this)">Preparing</button>
+    <button class="filter-btn" onclick="setFilter('ready', this)">Ready</button>
+    <button class="filter-btn" onclick="setFilter('picked_up', this)">Picked Up</button>
+  </div>
+
+  <!-- Orders -->
+  <div class="orders-wrap">
+    <div id="emptyState" class="empty-state">
+      <div class="empty-state-icon">🍜</div>
+      <p>No orders yet.<br>Waiting for customers to place their first order...</p>
+    </div>
+    <div class="orders-grid" id="ordersGrid"></div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast">
+    <div class="toast-title" id="toastTitle"></div>
+    <div id="toastMsg"></div>
+  </div>
+
+  <script>
+    // ─── State ──────────────────────────────────────────────────
+    let allOrders  = [];
+    let filter     = 'all';
+
+    // ─── Load existing orders ────────────────────────────────────
+    async function loadOrders() {
+      try {
+        const res  = await fetch('/admin/orders');
+        const data = await res.json();
+        allOrders  = data.orders;
+        renderAll();
+      } catch (e) {
+        console.error('Failed to load orders', e);
+      }
+    }
+
+    // ─── SSE — real-time updates ─────────────────────────────────
+    function connectSSE() {
+      const es = new EventSource('/admin/stream');
+
+      es.onopen = () => {
+        document.getElementById('liveDot').classList.remove('offline');
+        document.getElementById('liveStatus').textContent = 'Live';
+      };
+
+      es.onmessage = (e) => {
+        const payload = JSON.parse(e.data);
+
+        if (payload.__type === 'status_update') {
+          // Update existing order status in memory
+          const order = allOrders.find(o => o.order_id === payload.order_id);
+          if (order) {
+            order.status     = payload.status;
+            order.updated_at = payload.updated_at;
+          }
+          renderAll();
+          return;
+        }
+
+        // New order arrived
+        allOrders.unshift(payload);
+        renderAll();
+        showToast(
+          `🍜 New Order — ${payload.order_id}`,
+          `${payload.customer.name} · $${payload.pricing.total.toFixed(2)}`
+        );
+
+        // Play a soft beep if possible
+        try {
+          const ctx = new AudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.4);
+        } catch (_) {}
+      };
+
+      es.onerror = () => {
+        document.getElementById('liveDot').classList.add('offline');
+        document.getElementById('liveStatus').textContent = 'Reconnecting...';
+      };
+    }
+
+    // ─── Render ──────────────────────────────────────────────────
+    function renderAll() {
+      updateStats();
+      renderOrders();
+    }
+
+    function updateStats() {
+      const today = new Date().toDateString();
+
+      const todayOrders = allOrders.filter(o =>
+        new Date(o.placed_at || o.received_at).toDateString() === today
+      );
+
+      document.getElementById('statTotal').textContent    = allOrders.length;
+      document.getElementById('statNew').textContent      = allOrders.filter(o => o.status === 'new').length;
+      document.getElementById('statPreparing').textContent= allOrders.filter(o => o.status === 'preparing').length;
+      document.getElementById('statReady').textContent    = allOrders.filter(o => o.status === 'ready').length;
+
+      const revenue = todayOrders
+        .filter(o => o.status !== 'picked_up')
+        .reduce((sum, o) => sum + (o.pricing?.total || 0), 0);
+      document.getElementById('statRevenue').textContent = `$${revenue.toFixed(2)}`;
+    }
+
+    function renderOrders() {
+      const filtered = filter === 'all'
+        ? allOrders
+        : allOrders.filter(o => o.status === filter);
+
+      const grid       = document.getElementById('ordersGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      if (filtered.length === 0) {
+        grid.innerHTML   = '';
+        emptyState.style.display = '';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      grid.innerHTML = filtered.map(order => orderCardHTML(order)).join('');
+    }
+
+    function orderCardHTML(order) {
+      const statusLabels = { new: 'New', preparing: 'Preparing', ready: 'Ready for Pick-Up', picked_up: 'Picked Up' };
+      const time = new Date(order.received_at || order.placed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const date = new Date(order.received_at || order.placed_at).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+      const itemsHTML = (order.items || []).map(item => `
+        <div class="order-item-row">
+          <span class="order-item-name">${item.name}</span>
+          <span class="order-item-qty">×${item.qty}</span>
+          <span class="order-item-sub">$${item.subtotal.toFixed(2)}</span>
+        </div>
+      `).join('');
+
+      const notesHTML = order.notes
+        ? `<div class="order-notes">📝 ${order.notes}</div>`
+        : '';
+
+      const btnClass = (status) => {
+        if (order.status !== status) return '';
+        return status === 'new' ? 'active-btn'
+             : status === 'preparing' ? 'active-orange'
+             : status === 'ready'     ? 'active-green'
+             : 'active-grey';
+      };
+
+      return `
+        <div class="order-card status-${order.status}" id="card-${order.order_id}">
+          <div class="order-card-header">
+            <div>
+              <div class="order-id">${order.order_id}</div>
+              <div class="order-time">${date} · ${time}</div>
+            </div>
+            <span class="status-badge ${order.status}">${statusLabels[order.status] || order.status}</span>
+          </div>
+
+          <div class="customer-info">
+            <div class="customer-name">${order.customer.name}</div>
+            <div class="customer-detail">
+              <a href="tel:${order.customer.phone}">📞 ${order.customer.phone}</a><br>
+              <a href="mailto:${order.customer.email}">✉️ ${order.customer.email}</a>
+            </div>
+          </div>
+
+          <div class="order-items">${itemsHTML}</div>
+
+          <div class="order-totals">
+            <div class="order-total-row"><span>Subtotal</span><span>$${order.pricing.subtotal.toFixed(2)}</span></div>
+            <div class="order-total-row"><span>GST</span><span>$${order.pricing.tax.toFixed(2)}</span></div>
+            <div class="order-total-row grand"><span>Total</span><span>$${order.pricing.total.toFixed(2)}</span></div>
+          </div>
+
+          ${notesHTML}
+
+          <div class="status-actions">
+            <button class="status-action-btn ${btnClass('new')}"       onclick="updateStatus('${order.order_id}', 'new')">New</button>
+            <button class="status-action-btn ${btnClass('preparing')}" onclick="updateStatus('${order.order_id}', 'preparing')">Preparing</button>
+            <button class="status-action-btn ${btnClass('ready')}"     onclick="updateStatus('${order.order_id}', 'ready')">Ready</button>
+            <button class="status-action-btn ${btnClass('picked_up')}" onclick="updateStatus('${order.order_id}', 'picked_up')">Picked Up</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ─── Update Status ────────────────────────────────────────────
+    async function updateStatus(orderId, status) {
+      try {
+        const res = await fetch(`/admin/orders/${orderId}/status`, {
+          method:  'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ status }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          const order = allOrders.find(o => o.order_id === orderId);
+          if (order) order.status = status;
+          renderAll();
+        }
+      } catch (e) {
+        console.error('Failed to update status', e);
+      }
+    }
+
+    // ─── Filter ───────────────────────────────────────────────────
+    function setFilter(value, btn) {
+      filter = value;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderOrders();
+    }
+
+    // ─── Toast ────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(title, msg) {
+      clearTimeout(toastTimer);
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMsg').textContent   = msg;
+      const toast = document.getElementById('toast');
+      toast.style.display = '';
+      toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 5000);
+    }
+
+    // ─── Boot ─────────────────────────────────────────────────────
+    loadOrders();
+    connectSSE();
+  </script>
+</body>
+</html>
