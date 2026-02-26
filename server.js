@@ -128,6 +128,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', orders: orders.length, clients: sseClients.length });
 });
 
+// Redirect root to admin dashboard
+app.get('/', (req, res) => {
+  res.redirect('/admin');
+});
+
 // Serve admin dashboard at /admin
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin-public', 'dashboard.html'));
