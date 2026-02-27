@@ -28,27 +28,12 @@ app.use(express.static(path.join(__dirname, 'admin-public')));
 
 // ─── Helpers ─────────────────────────────────────────────────
 function broadcastOrder(order) {
-  // Push the new order to all connected admin dashboard browsers
   const payload = `data: ${JSON.stringify(order)}\n\n`;
   sseClients.forEach(client => client.res.write(payload));
 }
 
-function verifySecret(req) {
-  const secret = process.env.WEBHOOK_SECRET;
-  if (!secret) return true; // no secret configured → allow all
-  return req.headers['x-webhook-secret'] === secret;
-}
-
 // ─── Webhook Endpoint ─────────────────────────────────────────
-// This is the URL you paste into your restaurant API's WEBHOOK_URL
-// e.g. http://localhost:4000/webhook/orders
 app.post('/webhook/orders', (req, res) => {
-  // 1. Verify secret
-  if (!verifySecret(req)) {
-    console.warn('⛔ Rejected webhook — invalid secret');
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   const order = req.body;
 
   // 2. Basic sanity check
