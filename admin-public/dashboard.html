@@ -7,101 +7,131 @@
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink:#0d0b08;--paper:#f5f0e8;--ember:#c8421a;--gold:#d4a843;--mist:#8b8070;
-      --smoke:#1e1a14;--warm-white:#faf7f2;--card:#161210;--border:rgba(212,168,67,0.15);
-      --green:#4caf78;--orange:#e8943a;
+      --ink:#0d0b08; --paper:#f5f0e8; --ember:#c8421a; --gold:#d4a843; --mist:#8b8070;
+      --smoke:#1e1a14; --warm-white:#faf7f2; --card:#161210; --border:rgba(212,168,67,0.15);
+      --green:#4caf78; --orange:#e8943a;
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Cormorant Garamond',serif;background:var(--ink);color:var(--paper);min-height:100vh;}
-    header{background:rgba(13,11,8,0.97);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-    .logo{font-family:'Shippori Mincho',serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.1em;}
-    .logo span{display:block;font-family:'Cormorant Garamond',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--mist);text-transform:uppercase;}
-    .live-indicator{display:flex;align-items:center;gap:0.5rem;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--mist);}
-    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
-    .live-dot.offline{background:var(--ember);animation:none;}
-    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { font-size: 18px; } /* Base font bump */
+    body { font-family:'Cormorant Garamond',serif; background:var(--ink); color:var(--paper); min-height:100vh; font-size:1rem; }
 
-    .stats-bar{display:flex;gap:2px;padding:0 2rem;margin:2rem 0 1.5rem;flex-wrap:wrap;}
-    .stat-card{background:var(--card);border:1px solid var(--border);padding:1.2rem 2rem;flex:1;min-width:120px;text-align:center;}
-    .stat-num{font-family:'Shippori Mincho',serif;font-size:2rem;color:var(--gold);line-height:1;}
-    .stat-label{font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--mist);margin-top:0.3rem;}
+    /* ── HEADER ── */
+    header { background:rgba(13,11,8,0.97); border-bottom:1px solid var(--border); padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+    .logo { font-family:'Shippori Mincho',serif; font-size:1.15rem; color:var(--gold); letter-spacing:0.1em; }
+    .logo span { display:block; font-family:'Cormorant Garamond',serif; font-size:0.65rem; letter-spacing:0.3em; color:var(--mist); text-transform:uppercase; margin-top:2px; }
+    .live-indicator { display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--mist); }
+    .live-dot { width:10px; height:10px; border-radius:50%; background:var(--green); animation:pulse 2s ease-in-out infinite; flex-shrink:0; }
+    .live-dot.offline { background:var(--ember); animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(0.8);} }
 
-    .filters{display:flex;gap:0.5rem;padding:0 2rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
-    .filter-label{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--mist);margin-right:0.5rem;}
-    .filter-btn{background:transparent;border:1px solid var(--border);color:var(--mist);padding:0.35rem 1rem;font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
-    .filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,0.05);}
+    /* ── STATS ── */
+    .stats-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:2px; padding:1.25rem 1.25rem 0; }
+    .stat-card { background:var(--card); border:1px solid var(--border); padding:1rem 0.75rem; text-align:center; }
+    .stat-num { font-family:'Shippori Mincho',serif; font-size:1.9rem; color:var(--gold); line-height:1; }
+    .stat-label { font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--mist); margin-top:0.35rem; }
 
-    .orders-wrap{padding:0 2rem 3rem;}
-    .empty-state{text-align:center;padding:5rem 2rem;color:var(--mist);}
-    .empty-state-icon{font-size:3rem;margin-bottom:1rem;}
-    .empty-state p{font-size:1rem;font-style:italic;line-height:1.7;}
-    .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;}
+    /* ── FILTERS ── */
+    .filters { display:flex; gap:0.4rem; padding:1.25rem 1.25rem 0; flex-wrap:wrap; align-items:center; }
+    .filter-label { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--mist); margin-right:0.3rem; }
+    .filter-btn { background:transparent; border:1px solid var(--border); color:var(--mist); padding:0.5rem 1rem; font-family:'Cormorant Garamond',serif; font-size:0.85rem; letter-spacing:0.1em; cursor:pointer; transition:all 0.2s; text-transform:uppercase; border-radius:0; -webkit-appearance:none; }
+    .filter-btn:hover,.filter-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(212,168,67,0.05); }
 
-    .order-card{background:var(--card);border:1px solid var(--border);padding:1.5rem;position:relative;animation:slideIn 0.4s ease both;}
-    .order-card.status-pending   {border-left:3px solid var(--orange);}
-    .order-card.status-confirmed {border-left:3px solid var(--green);}
-    .order-card.status-cancelled {border-left:3px solid var(--mist);opacity:0.55;}
-    .order-card.status-rejected  {border-left:3px solid var(--ember);opacity:0.55;}
-    @keyframes slideIn{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+    /* ── GRID ── */
+    .orders-wrap { padding:1.25rem; padding-bottom:4rem; }
+    .empty-state { text-align:center; padding:5rem 2rem; color:var(--mist); }
+    .empty-state-icon { font-size:3.5rem; margin-bottom:1rem; }
+    .empty-state p { font-size:1.05rem; font-style:italic; line-height:1.8; }
+    .orders-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.25rem; }
 
-    .order-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;}
-    .order-id{font-family:'Shippori Mincho',serif;font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;}
-    .order-time{font-size:0.7rem;color:var(--mist);font-style:italic;}
-    .status-badge{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.25rem 0.7rem;}
-    .badge-pending  {background:rgba(232,148,58,0.15);color:var(--orange);border:1px solid rgba(232,148,58,0.3);}
-    .badge-confirmed{background:rgba(76,175,120,0.15);color:var(--green);border:1px solid rgba(76,175,120,0.3);}
-    .badge-cancelled{background:rgba(139,128,112,0.1);color:var(--mist);border:1px solid rgba(139,128,112,0.2);}
-    .badge-rejected {background:rgba(200,66,26,0.15);color:var(--ember);border:1px solid rgba(200,66,26,0.3);}
+    /* ── ORDER CARD ── */
+    .order-card { background:var(--card); border:1px solid var(--border); padding:1.4rem; position:relative; animation:slideIn 0.4s ease both; }
+    .order-card.status-pending   { border-left:4px solid var(--orange); }
+    .order-card.status-confirmed { border-left:4px solid var(--green); }
+    .order-card.status-cancelled { border-left:4px solid var(--mist); opacity:0.55; }
+    .order-card.status-rejected  { border-left:4px solid var(--ember); opacity:0.55; }
+    @keyframes slideIn { from{opacity:0;transform:translateY(-10px);} to{opacity:1;transform:translateY(0);} }
 
-    .customer-info{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
-    .customer-name{font-family:'Shippori Mincho',serif;font-size:1.1rem;color:var(--warm-white);margin-bottom:0.2rem;}
-    .customer-detail{font-size:0.8rem;color:var(--mist);line-height:1.7;}
-    .customer-detail a{color:var(--mist);text-decoration:none;transition:color 0.2s;}
-    .customer-detail a:hover{color:var(--gold);}
+    .order-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; gap:0.5rem; }
+    .order-id { font-family:'Shippori Mincho',serif; font-size:0.85rem; color:var(--gold); letter-spacing:0.08em; }
+    .order-time { font-size:0.75rem; color:var(--mist); font-style:italic; margin-top:2px; }
 
-    .order-items{margin-bottom:1rem;}
-    .order-item-row{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--paper);line-height:1.8;gap:0.5rem;}
-    .order-item-name{flex:1;color:rgba(245,240,232,0.8);}
-    .order-item-qty{color:var(--mist);}
-    .order-item-sub{color:var(--gold);font-family:'Shippori Mincho',serif;}
+    .status-badge { font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; padding:0.3rem 0.75rem; flex-shrink:0; }
+    .badge-pending   { background:rgba(232,148,58,0.15); color:var(--orange); border:1px solid rgba(232,148,58,0.3); }
+    .badge-confirmed { background:rgba(76,175,120,0.15); color:var(--green);  border:1px solid rgba(76,175,120,0.3); }
+    .badge-cancelled { background:rgba(139,128,112,0.1); color:var(--mist);   border:1px solid rgba(139,128,112,0.2); }
+    .badge-rejected  { background:rgba(200,66,26,0.15);  color:var(--ember);  border:1px solid rgba(200,66,26,0.3); }
 
-    .order-totals{border-top:1px solid var(--border);padding-top:0.7rem;margin-bottom:1rem;}
-    .order-total-row{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--mist);line-height:1.9;}
-    .order-total-row.grand{font-family:'Shippori Mincho',serif;font-size:1rem;color:var(--warm-white);}
-    .order-notes{font-size:0.78rem;font-style:italic;color:var(--mist);background:rgba(212,168,67,0.04);border-left:2px solid rgba(212,168,67,0.2);padding:0.5rem 0.75rem;margin-bottom:1rem;}
+    .customer-info { margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+    .customer-name { font-family:'Shippori Mincho',serif; font-size:1.2rem; color:var(--warm-white); margin-bottom:0.3rem; }
+    .customer-detail { font-size:0.9rem; color:var(--mist); line-height:1.9; }
+    .customer-detail a { color:var(--mist); text-decoration:none; transition:color 0.2s; display:inline-block; padding:2px 0; }
+    .customer-detail a:hover { color:var(--gold); }
 
-    /* Reject timer */
-    .reject-timer{background:rgba(200,66,26,0.07);border:1px solid rgba(200,66,26,0.2);padding:0.6rem 0.9rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;}
-    .reject-timer-label{font-size:0.7rem;color:var(--ember);letter-spacing:0.08em;white-space:nowrap;}
-    .reject-bar-wrap{flex:1;height:3px;background:rgba(200,66,26,0.15);}
-    .reject-bar-fill{height:100%;background:var(--ember);transition:width 1s linear;}
-    .reject-count{font-family:'Shippori Mincho',serif;font-size:1rem;color:var(--ember);white-space:nowrap;}
+    .order-items { margin-bottom:1rem; }
+    .order-item-row { display:flex; justify-content:space-between; font-size:0.9rem; color:var(--paper); line-height:1.9; gap:0.5rem; }
+    .order-item-name { flex:1; color:rgba(245,240,232,0.85); }
+    .order-item-qty  { color:var(--mist); }
+    .order-item-sub  { color:var(--gold); font-family:'Shippori Mincho',serif; }
 
-    /* Minutes picker */
-    .minutes-row{display:flex;gap:0.4rem;margin-bottom:0.8rem;align-items:center;}
-    .minutes-label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--mist);margin-right:0.3rem;white-space:nowrap;}
-    .min-btn{flex:1;padding:0.45rem 0.2rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--mist);font-family:'Cormorant Garamond',serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;text-align:center;}
-    .min-btn:hover{border-color:var(--green);color:var(--green);}
-    .min-btn.selected{background:rgba(76,175,120,0.15);border-color:var(--green);color:var(--green);}
+    .order-totals { border-top:1px solid var(--border); padding-top:0.75rem; margin-bottom:1rem; }
+    .order-total-row { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--mist); line-height:2; }
+    .order-total-row.grand { font-family:'Shippori Mincho',serif; font-size:1.05rem; color:var(--warm-white); }
+    .order-notes { font-size:0.85rem; font-style:italic; color:var(--mist); background:rgba(212,168,67,0.04); border-left:2px solid rgba(212,168,67,0.2); padding:0.6rem 0.8rem; margin-bottom:1rem; line-height:1.6; }
 
-    /* Action buttons */
-    .action-row{display:flex;gap:0.5rem;}
-    .btn-confirm{flex:2;padding:0.65rem;background:var(--green);border:none;color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
-    .btn-confirm:hover{opacity:0.85;}
-    .btn-confirm:disabled{opacity:0.35;cursor:not-allowed;}
-    .btn-cancel{flex:1;padding:0.65rem;background:transparent;border:1px solid rgba(200,66,26,0.4);color:var(--ember);font-family:'Cormorant Garamond',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-    .btn-cancel:hover{background:rgba(200,66,26,0.1);}
+    /* ── REJECT TIMER ── */
+    .reject-timer { background:rgba(200,66,26,0.07); border:1px solid rgba(200,66,26,0.2); padding:0.75rem 1rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem; }
+    .reject-timer-label { font-size:0.78rem; color:var(--ember); white-space:nowrap; }
+    .reject-bar-wrap { flex:1; height:4px; background:rgba(200,66,26,0.15); border-radius:2px; }
+    .reject-bar-fill { height:100%; background:var(--ember); transition:width 1s linear; border-radius:2px; }
+    .reject-count { font-family:'Shippori Mincho',serif; font-size:1.1rem; color:var(--ember); white-space:nowrap; min-width:38px; text-align:right; }
 
-    /* Confirmed cook timer */
-    .cook-timer{background:rgba(76,175,120,0.07);border:1px solid rgba(76,175,120,0.2);padding:0.7rem 1rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;}
-    .cook-timer-label{font-size:0.7rem;color:var(--green);letter-spacing:0.08em;}
-    .cook-timer-count{font-family:'Shippori Mincho',serif;font-size:1.2rem;color:var(--green);}
+    /* ── MINUTES PICKER ── */
+    .minutes-row { display:flex; gap:0.4rem; margin-bottom:0.9rem; align-items:center; flex-wrap:wrap; }
+    .minutes-label { font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--mist); width:100%; margin-bottom:0.3rem; }
+    .min-btn { flex:1; min-width:44px; padding:0.65rem 0.2rem; background:rgba(255,255,255,0.04); border:1px solid var(--border); color:var(--mist); font-family:'Cormorant Garamond',serif; font-size:1rem; cursor:pointer; transition:all 0.2s; text-align:center; -webkit-appearance:none; }
+    .min-btn:hover  { border-color:var(--green); color:var(--green); }
+    .min-btn.selected { background:rgba(76,175,120,0.15); border-color:var(--green); color:var(--green); }
 
-    .status-note{font-size:0.78rem;font-style:italic;color:var(--mist);text-align:center;padding:0.6rem 0;}
+    /* ── ACTION BUTTONS ── */
+    .action-row { display:flex; gap:0.5rem; }
+    .btn-confirm { flex:2; padding:0.9rem; background:var(--green); border:none; color:var(--ink); font-family:'Cormorant Garamond',serif; font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; -webkit-appearance:none; }
+    .btn-confirm:hover { opacity:0.85; }
+    .btn-confirm:disabled { opacity:0.35; cursor:not-allowed; }
+    .btn-cancel { flex:1; padding:0.9rem; background:transparent; border:1px solid rgba(200,66,26,0.4); color:var(--ember); font-family:'Cormorant Garamond',serif; font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; -webkit-appearance:none; }
+    .btn-cancel:hover { background:rgba(200,66,26,0.1); }
 
-    #toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid var(--gold);color:var(--warm-white);padding:1rem 1.5rem;font-size:0.85rem;max-width:320px;z-index:999;display:none;animation:toastIn 0.3s ease;}
-    @keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-    .toast-title{font-family:'Shippori Mincho',serif;color:var(--gold);margin-bottom:0.3rem;}
+    /* ── COOK TIMER ── */
+    .cook-timer { background:rgba(76,175,120,0.07); border:1px solid rgba(76,175,120,0.2); padding:0.85rem 1rem; display:flex; align-items:center; justify-content:space-between; margin-bottom:0.9rem; }
+    .cook-timer-label { font-size:0.78rem; color:var(--green); }
+    .cook-timer-count { font-family:'Shippori Mincho',serif; font-size:1.4rem; color:var(--green); }
+
+    .status-note { font-size:0.85rem; font-style:italic; color:var(--mist); text-align:center; padding:0.75rem 0; }
+
+    /* ── TOAST ── */
+    #toast { position:fixed; bottom:1.5rem; right:1.25rem; left:1.25rem; background:var(--card); border:1px solid var(--gold); color:var(--warm-white); padding:1rem 1.25rem; font-size:0.95rem; z-index:999; display:none; animation:toastIn 0.3s ease; max-width:420px; margin:0 auto; }
+    @media(min-width:500px) { #toast { left:auto; right:1.5rem; max-width:340px; } }
+    @keyframes toastIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+    .toast-title { font-family:'Shippori Mincho',serif; color:var(--gold); margin-bottom:0.3rem; font-size:1rem; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      html { font-size: 17px; }
+      .stats-bar { grid-template-columns: repeat(3,1fr); padding:1rem 1rem 0; }
+      .stat-card:nth-child(4), .stat-card:nth-child(5) { grid-column: span 1; }
+      /* make revenue span full on small screens */
+      .stat-card:last-child { grid-column: 1 / -1; }
+      .stat-num { font-size:1.6rem; }
+      .filters { padding:1rem 1rem 0; gap:0.35rem; }
+      .filter-btn { padding:0.55rem 0.75rem; font-size:0.8rem; }
+      .orders-wrap { padding:1rem; padding-bottom:4rem; }
+      .orders-grid { grid-template-columns:1fr; gap:1rem; }
+      .order-card { padding:1.2rem; }
+      .customer-name { font-size:1.15rem; }
+      .min-btn { padding:0.75rem 0.1rem; font-size:1.05rem; }
+      .btn-confirm, .btn-cancel { padding:1rem; font-size:0.9rem; }
+      .cook-timer-count { font-size:1.6rem; }
+      .logo { font-size:1rem; }
+    }
   </style>
 </head>
 <body>
@@ -115,11 +145,11 @@
 </header>
 
 <div class="stats-bar">
-  <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Today's Orders</div></div>
+  <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Today</div></div>
   <div class="stat-card"><div class="stat-num" id="statPending" style="color:var(--orange)">0</div><div class="stat-label">Pending</div></div>
   <div class="stat-card"><div class="stat-num" id="statConfirmed" style="color:var(--green)">0</div><div class="stat-label">Confirmed</div></div>
   <div class="stat-card"><div class="stat-num" id="statCancelled" style="color:var(--mist)">0</div><div class="stat-label">Cancelled</div></div>
-  <div class="stat-card"><div class="stat-num" id="statRevenue">$0.00</div><div class="stat-label">Revenue Today</div></div>
+  <div class="stat-card"><div class="stat-num" id="statRevenue">$0</div><div class="stat-label">Revenue Today</div></div>
 </div>
 
 <div class="filters">
@@ -144,17 +174,16 @@
 <script>
   let allOrders = [];
   let filter    = 'all';
-  const timers  = {}; // { orderId: { rejectInterval, confirmInterval, selectedMinutes } }
-  const REJECT_SECS = 300; // 5 minutes
+  const timers  = {};
+  const REJECT_SECS = 300;
 
-  // ── Load & SSE ──────────────────────────────────────────────
   async function loadOrders() {
     try {
       const data = await (await fetch('/admin/orders')).json();
       allOrders  = data.orders;
       renderAll();
       allOrders.forEach(o => {
-        if (o.status === 'pending')    startRejectTimer(o.order_id, o.received_at);
+        if (o.status === 'pending') startRejectTimer(o.order_id, o.received_at);
         if (o.status === 'confirmed' && o.confirm_minutes && o.confirmed_at)
           startCookTimer(o.order_id, o.confirm_minutes, o.confirmed_at);
       });
@@ -171,7 +200,7 @@
       const p = JSON.parse(e.data);
       if (p.__type === 'status_update') {
         const o = allOrders.find(o => o.order_id === p.order_id);
-        if (o) Object.assign(o, { status: p.status, updated_at: p.updated_at, confirm_minutes: p.confirm_minutes || o.confirm_minutes, confirmed_at: p.confirmed_at || o.confirmed_at });
+        if (o) Object.assign(o, { status:p.status, updated_at:p.updated_at, confirm_minutes:p.confirm_minutes||o.confirm_minutes, confirmed_at:p.confirmed_at||o.confirmed_at });
         renderAll();
         return;
       }
@@ -179,7 +208,7 @@
       renderAll();
       startRejectTimer(p.order_id, p.received_at);
       beep();
-      showToast(`🍜 New Order — ${p.order_id}`, `${p.customer.name} · $${p.pricing.total.toFixed(2)}`);
+      showToast(`🍜 New Order!`, `${p.customer.name} · $${p.pricing.total.toFixed(2)}`);
     };
     es.onerror = () => {
       document.getElementById('liveDot').classList.add('offline');
@@ -187,19 +216,16 @@
     };
   }
 
-  // ── Reject timer (5 min auto-reject) ────────────────────────
   function startRejectTimer(orderId, receivedAt) {
     if (timers[orderId]?.rejectInterval) return;
     timers[orderId] = timers[orderId] || {};
     const deadline = new Date(receivedAt).getTime() + REJECT_SECS * 1000;
-
     timers[orderId].rejectInterval = setInterval(() => {
       const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
       const fill  = document.getElementById(`rf-${orderId}`);
       const count = document.getElementById(`rc-${orderId}`);
-      if (fill)  fill.style.width  = `${(remaining / REJECT_SECS) * 100}%`;
+      if (fill)  fill.style.width  = `${(remaining/REJECT_SECS)*100}%`;
       if (count) count.textContent = `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
-
       if (remaining <= 0) {
         clearInterval(timers[orderId].rejectInterval);
         const o = allOrders.find(o => o.order_id === orderId);
@@ -208,23 +234,20 @@
     }, 1000);
   }
 
-  // ── Cook timer (countdown after confirm) ────────────────────
   function startCookTimer(orderId, minutes, confirmedAt) {
     if (timers[orderId]?.confirmInterval) clearInterval(timers[orderId].confirmInterval);
     timers[orderId] = timers[orderId] || {};
     const readyAt = new Date(confirmedAt).getTime() + minutes * 60 * 1000;
-
     timers[orderId].confirmInterval = setInterval(() => {
       const remaining = Math.max(0, Math.floor((readyAt - Date.now()) / 1000));
       const el = document.getElementById(`ct-${orderId}`);
       if (el) el.textContent = remaining > 0
         ? `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')} left`
-        : '✅ Ready for pick-up!';
+        : '✅ Ready!';
       if (remaining <= 0) clearInterval(timers[orderId].confirmInterval);
     }, 1000);
   }
 
-  // ── Select prep minutes ──────────────────────────────────────
   function selectMinutes(orderId, min) {
     timers[orderId] = timers[orderId] || {};
     timers[orderId].selectedMinutes = min;
@@ -234,20 +257,18 @@
     if (btn) btn.disabled = false;
   }
 
-  // ── Confirm order ────────────────────────────────────────────
   async function confirmOrder(orderId) {
     const minutes = timers[orderId]?.selectedMinutes;
     if (!minutes) return;
     clearInterval(timers[orderId]?.rejectInterval);
     const confirmedAt = new Date().toISOString();
-    await updateStatus(orderId, 'confirmed', { confirm_minutes: minutes, confirmed_at: confirmedAt });
+    await updateStatus(orderId, 'confirmed', { confirm_minutes:minutes, confirmed_at:confirmedAt });
     const o = allOrders.find(o => o.order_id === orderId);
     if (o) { o.confirm_minutes = minutes; o.confirmed_at = confirmedAt; }
     renderAll();
     startCookTimer(orderId, minutes, confirmedAt);
   }
 
-  // ── Cancel order ─────────────────────────────────────────────
   async function cancelOrder(orderId) {
     if (!confirm('Cancel this order? Revenue will not be counted.')) return;
     clearInterval(timers[orderId]?.rejectInterval);
@@ -255,11 +276,10 @@
     await updateStatus(orderId, 'cancelled');
   }
 
-  // ── PATCH status ─────────────────────────────────────────────
   async function updateStatus(orderId, status, extra = {}) {
     try {
       const res  = await fetch(`/admin/orders/${orderId}/status`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        method:'PATCH', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ status, ...extra }),
       });
       const data = await res.json();
@@ -271,7 +291,6 @@
     } catch(e) { console.error(e); }
   }
 
-  // ── Render ───────────────────────────────────────────────────
   function renderAll() { updateStats(); renderOrders(); }
 
   function updateStats() {
@@ -281,7 +300,6 @@
     document.getElementById('statPending').textContent   = td.filter(o=>o.status==='pending').length;
     document.getElementById('statConfirmed').textContent = td.filter(o=>o.status==='confirmed').length;
     document.getElementById('statCancelled').textContent = td.filter(o=>['cancelled','rejected'].includes(o.status)).length;
-    // Revenue: only confirmed orders count
     const rev = td.filter(o=>o.status==='confirmed').reduce((s,o)=>s+(o.pricing?.total||0),0);
     document.getElementById('statRevenue').textContent = `$${rev.toFixed(2)}`;
   }
@@ -293,7 +311,6 @@
     if (!filtered.length) { grid.innerHTML=''; empty.style.display=''; return; }
     empty.style.display = 'none';
     grid.innerHTML = filtered.map(cardHTML).join('');
-    // Re-attach timers after re-render
     filtered.forEach(o => {
       if (o.status==='pending') startRejectTimer(o.order_id, o.received_at);
       if (o.status==='confirmed'&&o.confirm_minutes&&o.confirmed_at)
@@ -302,11 +319,11 @@
   }
 
   function cardHTML(o) {
-    const id   = o.order_id;
+    const id  = o.order_id;
     const time = new Date(o.received_at||o.placed_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     const date = new Date(o.received_at||o.placed_at).toLocaleDateString([],{month:'short',day:'numeric'});
-    const badgeMap  = {pending:'badge-pending',confirmed:'badge-confirmed',cancelled:'badge-cancelled',rejected:'badge-rejected'};
-    const labelMap  = {pending:'Pending',confirmed:'Confirmed',cancelled:'Cancelled',rejected:'Auto-Rejected'};
+    const badgeMap = {pending:'badge-pending',confirmed:'badge-confirmed',cancelled:'badge-cancelled',rejected:'badge-rejected'};
+    const labelMap = {pending:'Pending',confirmed:'Confirmed',cancelled:'Cancelled',rejected:'Auto-Rejected'};
 
     const items = (o.items||[]).map(i=>`
       <div class="order-item-row">
@@ -326,7 +343,7 @@
           <span class="reject-count" id="rc-${id}">5:00</span>
         </div>
         <div class="minutes-row">
-          <span class="minutes-label">Prep time:</span>
+          <span class="minutes-label">How long to prepare?</span>
           ${[10,15,20,25,30].map(m=>`<button class="min-btn" data-oid="${id}" data-min="${m}" onclick="selectMinutes('${id}',${m})">${m}m</button>`).join('')}
         </div>
         <div class="action-row">
@@ -372,7 +389,6 @@
       </div>`;
   }
 
-  // ── Filter ────────────────────────────────────────────────────
   function setFilter(v, btn) {
     filter = v;
     document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -380,7 +396,6 @@
     renderOrders();
   }
 
-  // ── Toast ─────────────────────────────────────────────────────
   let toastTimer;
   function showToast(title, msg) {
     clearTimeout(toastTimer);
@@ -391,14 +406,13 @@
     toastTimer = setTimeout(()=>t.style.display='none', 6000);
   }
 
-  // ── Beep ──────────────────────────────────────────────────────
   function beep() {
     try {
       const ctx=new AudioContext(),osc=ctx.createOscillator(),g=ctx.createGain();
-      osc.connect(g);g.connect(ctx.destination);osc.frequency.value=880;
+      osc.connect(g); g.connect(ctx.destination); osc.frequency.value=880;
       g.gain.setValueAtTime(0.3,ctx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
-      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.5);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.5);
     } catch(_){}
   }
 
