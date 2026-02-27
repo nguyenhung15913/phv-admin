@@ -7,638 +7,403 @@
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink:        #0d0b08;
-      --paper:      #f5f0e8;
-      --ember:      #c8421a;
-      --gold:       #d4a843;
-      --mist:       #8b8070;
-      --smoke:      #1e1a14;
-      --warm-white: #faf7f2;
-      --card:       #161210;
-      --border:     rgba(212,168,67,0.15);
-      --green:      #4caf78;
-      --blue:       #5b9bd5;
-      --orange:     #e8943a;
+      --ink:#0d0b08;--paper:#f5f0e8;--ember:#c8421a;--gold:#d4a843;--mist:#8b8070;
+      --smoke:#1e1a14;--warm-white:#faf7f2;--card:#161210;--border:rgba(212,168,67,0.15);
+      --green:#4caf78;--orange:#e8943a;
     }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Cormorant Garamond',serif;background:var(--ink);color:var(--paper);min-height:100vh;}
+    header{background:rgba(13,11,8,0.97);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .logo{font-family:'Shippori Mincho',serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.1em;}
+    .logo span{display:block;font-family:'Cormorant Garamond',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--mist);text-transform:uppercase;}
+    .live-indicator{display:flex;align-items:center;gap:0.5rem;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--mist);}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
+    .live-dot.offline{background:var(--ember);animation:none;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    .stats-bar{display:flex;gap:2px;padding:0 2rem;margin:2rem 0 1.5rem;flex-wrap:wrap;}
+    .stat-card{background:var(--card);border:1px solid var(--border);padding:1.2rem 2rem;flex:1;min-width:120px;text-align:center;}
+    .stat-num{font-family:'Shippori Mincho',serif;font-size:2rem;color:var(--gold);line-height:1;}
+    .stat-label{font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--mist);margin-top:0.3rem;}
 
-    body {
-      font-family: 'Cormorant Garamond', serif;
-      background: var(--ink);
-      color: var(--paper);
-      min-height: 100vh;
-    }
+    .filters{display:flex;gap:0.5rem;padding:0 2rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+    .filter-label{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--mist);margin-right:0.5rem;}
+    .filter-btn{background:transparent;border:1px solid var(--border);color:var(--mist);padding:0.35rem 1rem;font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+    .filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,0.05);}
 
-    /* ─── HEADER ─── */
-    header {
-      background: rgba(13,11,8,0.97);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
+    .orders-wrap{padding:0 2rem 3rem;}
+    .empty-state{text-align:center;padding:5rem 2rem;color:var(--mist);}
+    .empty-state-icon{font-size:3rem;margin-bottom:1rem;}
+    .empty-state p{font-size:1rem;font-style:italic;line-height:1.7;}
+    .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;}
 
-    .logo {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 1.1rem;
-      color: var(--gold);
-      letter-spacing: 0.1em;
-    }
+    .order-card{background:var(--card);border:1px solid var(--border);padding:1.5rem;position:relative;animation:slideIn 0.4s ease both;}
+    .order-card.status-pending   {border-left:3px solid var(--orange);}
+    .order-card.status-confirmed {border-left:3px solid var(--green);}
+    .order-card.status-cancelled {border-left:3px solid var(--mist);opacity:0.55;}
+    .order-card.status-rejected  {border-left:3px solid var(--ember);opacity:0.55;}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
 
-    .logo span {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      color: var(--mist);
-      text-transform: uppercase;
-    }
+    .order-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;}
+    .order-id{font-family:'Shippori Mincho',serif;font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;}
+    .order-time{font-size:0.7rem;color:var(--mist);font-style:italic;}
+    .status-badge{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.25rem 0.7rem;}
+    .badge-pending  {background:rgba(232,148,58,0.15);color:var(--orange);border:1px solid rgba(232,148,58,0.3);}
+    .badge-confirmed{background:rgba(76,175,120,0.15);color:var(--green);border:1px solid rgba(76,175,120,0.3);}
+    .badge-cancelled{background:rgba(139,128,112,0.1);color:var(--mist);border:1px solid rgba(139,128,112,0.2);}
+    .badge-rejected {background:rgba(200,66,26,0.15);color:var(--ember);border:1px solid rgba(200,66,26,0.3);}
 
-    .live-indicator {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--mist);
-    }
+    .customer-info{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+    .customer-name{font-family:'Shippori Mincho',serif;font-size:1.1rem;color:var(--warm-white);margin-bottom:0.2rem;}
+    .customer-detail{font-size:0.8rem;color:var(--mist);line-height:1.7;}
+    .customer-detail a{color:var(--mist);text-decoration:none;transition:color 0.2s;}
+    .customer-detail a:hover{color:var(--gold);}
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
+    .order-items{margin-bottom:1rem;}
+    .order-item-row{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--paper);line-height:1.8;gap:0.5rem;}
+    .order-item-name{flex:1;color:rgba(245,240,232,0.8);}
+    .order-item-qty{color:var(--mist);}
+    .order-item-sub{color:var(--gold);font-family:'Shippori Mincho',serif;}
 
-    .live-dot.offline { background: var(--ember); animation: none; }
+    .order-totals{border-top:1px solid var(--border);padding-top:0.7rem;margin-bottom:1rem;}
+    .order-total-row{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--mist);line-height:1.9;}
+    .order-total-row.grand{font-family:'Shippori Mincho',serif;font-size:1rem;color:var(--warm-white);}
+    .order-notes{font-size:0.78rem;font-style:italic;color:var(--mist);background:rgba(212,168,67,0.04);border-left:2px solid rgba(212,168,67,0.2);padding:0.5rem 0.75rem;margin-bottom:1rem;}
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.5; transform: scale(0.8); }
-    }
+    /* Reject timer */
+    .reject-timer{background:rgba(200,66,26,0.07);border:1px solid rgba(200,66,26,0.2);padding:0.6rem 0.9rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;}
+    .reject-timer-label{font-size:0.7rem;color:var(--ember);letter-spacing:0.08em;white-space:nowrap;}
+    .reject-bar-wrap{flex:1;height:3px;background:rgba(200,66,26,0.15);}
+    .reject-bar-fill{height:100%;background:var(--ember);transition:width 1s linear;}
+    .reject-count{font-family:'Shippori Mincho',serif;font-size:1rem;color:var(--ember);white-space:nowrap;}
 
-    /* ─── STATS BAR ─── */
-    .stats-bar {
-      display: flex;
-      gap: 2px;
-      padding: 0 2rem;
-      margin: 2rem 0 1.5rem;
-      flex-wrap: wrap;
-    }
+    /* Minutes picker */
+    .minutes-row{display:flex;gap:0.4rem;margin-bottom:0.8rem;align-items:center;}
+    .minutes-label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--mist);margin-right:0.3rem;white-space:nowrap;}
+    .min-btn{flex:1;padding:0.45rem 0.2rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--mist);font-family:'Cormorant Garamond',serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;text-align:center;}
+    .min-btn:hover{border-color:var(--green);color:var(--green);}
+    .min-btn.selected{background:rgba(76,175,120,0.15);border-color:var(--green);color:var(--green);}
 
-    .stat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 1.2rem 2rem;
-      flex: 1;
-      min-width: 140px;
-      text-align: center;
-    }
+    /* Action buttons */
+    .action-row{display:flex;gap:0.5rem;}
+    .btn-confirm{flex:2;padding:0.65rem;background:var(--green);border:none;color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .btn-confirm:hover{opacity:0.85;}
+    .btn-confirm:disabled{opacity:0.35;cursor:not-allowed;}
+    .btn-cancel{flex:1;padding:0.65rem;background:transparent;border:1px solid rgba(200,66,26,0.4);color:var(--ember);font-family:'Cormorant Garamond',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .btn-cancel:hover{background:rgba(200,66,26,0.1);}
 
-    .stat-num {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 2rem;
-      color: var(--gold);
-      line-height: 1;
-    }
+    /* Confirmed cook timer */
+    .cook-timer{background:rgba(76,175,120,0.07);border:1px solid rgba(76,175,120,0.2);padding:0.7rem 1rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;}
+    .cook-timer-label{font-size:0.7rem;color:var(--green);letter-spacing:0.08em;}
+    .cook-timer-count{font-family:'Shippori Mincho',serif;font-size:1.2rem;color:var(--green);}
 
-    .stat-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--mist);
-      margin-top: 0.3rem;
-    }
+    .status-note{font-size:0.78rem;font-style:italic;color:var(--mist);text-align:center;padding:0.6rem 0;}
 
-    /* ─── FILTERS ─── */
-    .filters {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0 2rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .filter-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--mist);
-      margin-right: 0.5rem;
-    }
-
-    .filter-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--mist);
-      padding: 0.35rem 1rem;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-transform: uppercase;
-    }
-
-    .filter-btn:hover,
-    .filter-btn.active {
-      border-color: var(--gold);
-      color: var(--gold);
-      background: rgba(212,168,67,0.05);
-    }
-
-    /* ─── ORDERS GRID ─── */
-    .orders-wrap { padding: 0 2rem 3rem; }
-
-    .empty-state {
-      text-align: center;
-      padding: 5rem 2rem;
-      color: var(--mist);
-    }
-
-    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
-
-    .empty-state p {
-      font-size: 1rem;
-      font-style: italic;
-      line-height: 1.7;
-    }
-
-    .orders-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* ─── ORDER CARD ─── */
-    .order-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      position: relative;
-      animation: slideIn 0.4s ease both;
-      transition: border-color 0.3s;
-    }
-
-    .order-card.status-new       { border-left: 3px solid var(--ember); }
-    .order-card.status-preparing { border-left: 3px solid var(--orange); }
-    .order-card.status-ready     { border-left: 3px solid var(--green); }
-    .order-card.status-picked_up { border-left: 3px solid var(--mist); opacity: 0.6; }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .order-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-    }
-
-    .order-id {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 0.8rem;
-      color: var(--gold);
-      letter-spacing: 0.1em;
-    }
-
-    .order-time {
-      font-size: 0.7rem;
-      color: var(--mist);
-      font-style: italic;
-    }
-
-    .status-badge {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 0.25rem 0.7rem;
-      border-radius: 2px;
-    }
-
-    .status-badge.new        { background: rgba(200,66,26,0.15); color: var(--ember); border: 1px solid rgba(200,66,26,0.3); }
-    .status-badge.preparing  { background: rgba(232,148,58,0.15); color: var(--orange); border: 1px solid rgba(232,148,58,0.3); }
-    .status-badge.ready      { background: rgba(76,175,120,0.15); color: var(--green); border: 1px solid rgba(76,175,120,0.3); }
-    .status-badge.picked_up  { background: rgba(139,128,112,0.1); color: var(--mist); border: 1px solid rgba(139,128,112,0.2); }
-
-    .customer-info {
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .customer-name {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 1.1rem;
-      color: var(--warm-white);
-      margin-bottom: 0.2rem;
-    }
-
-    .customer-detail {
-      font-size: 0.8rem;
-      color: var(--mist);
-      line-height: 1.7;
-    }
-
-    .customer-detail a {
-      color: var(--mist);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .customer-detail a:hover { color: var(--gold); }
-
-    .order-items { margin-bottom: 1rem; }
-
-    .order-item-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      color: var(--paper);
-      line-height: 1.8;
-      gap: 0.5rem;
-    }
-
-    .order-item-name { flex: 1; color: rgba(245,240,232,0.8); }
-    .order-item-qty  { color: var(--mist); }
-    .order-item-sub  { color: var(--gold); font-family: 'Shippori Mincho', serif; }
-
-    .order-totals {
-      border-top: 1px solid var(--border);
-      padding-top: 0.7rem;
-      margin-bottom: 1rem;
-    }
-
-    .order-total-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.78rem;
-      color: var(--mist);
-      line-height: 1.9;
-    }
-
-    .order-total-row.grand {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 1rem;
-      color: var(--warm-white);
-    }
-
-    .order-notes {
-      font-size: 0.78rem;
-      font-style: italic;
-      color: var(--mist);
-      background: rgba(212,168,67,0.04);
-      border-left: 2px solid rgba(212,168,67,0.2);
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    /* ─── STATUS BUTTONS ─── */
-    .status-actions {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-    }
-
-    .status-action-btn {
-      flex: 1;
-      padding: 0.45rem 0.5rem;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--mist);
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .status-action-btn:hover          { border-color: var(--gold); color: var(--gold); }
-    .status-action-btn.active-btn     { background: var(--ember); border-color: var(--ember); color: white; }
-    .status-action-btn.active-orange  { background: var(--orange); border-color: var(--orange); color: white; }
-    .status-action-btn.active-green   { background: var(--green); border-color: var(--green); color: white; }
-    .status-action-btn.active-grey    { background: var(--mist); border-color: var(--mist); color: var(--ink); }
-
-    /* ─── TOAST ─── */
-    #toast {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: var(--card);
-      border: 1px solid var(--gold);
-      color: var(--warm-white);
-      padding: 1rem 1.5rem;
-      font-size: 0.85rem;
-      max-width: 320px;
-      z-index: 999;
-      display: none;
-      animation: toastIn 0.3s ease;
-    }
-
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .toast-title {
-      font-family: 'Shippori Mincho', serif;
-      color: var(--gold);
-      margin-bottom: 0.3rem;
-    }
+    #toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid var(--gold);color:var(--warm-white);padding:1rem 1.5rem;font-size:0.85rem;max-width:320px;z-index:999;display:none;animation:toastIn 0.3s ease;}
+    @keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .toast-title{font-family:'Shippori Mincho',serif;color:var(--gold);margin-bottom:0.3rem;}
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      PHO HUONG VIET
-      <span>Order Admin Dashboard</span>
-    </div>
-    <div class="live-indicator">
-      <div class="live-dot" id="liveDot"></div>
-      <span id="liveStatus">Connecting...</span>
-    </div>
-  </header>
-
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-card">
-      <div class="stat-num" id="statTotal">0</div>
-      <div class="stat-label">Total Orders</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statNew" style="color:var(--ember)">0</div>
-      <div class="stat-label">New</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statPreparing" style="color:var(--orange)">0</div>
-      <div class="stat-label">Preparing</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statReady" style="color:var(--green)">0</div>
-      <div class="stat-label">Ready</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statRevenue">$0</div>
-      <div class="stat-label">Revenue Today</div>
-    </div>
+<header>
+  <div class="logo">PHO HUONG VIET<span>Order Admin Dashboard</span></div>
+  <div class="live-indicator">
+    <div class="live-dot" id="liveDot"></div>
+    <span id="liveStatus">Connecting...</span>
   </div>
+</header>
 
-  <!-- Filters -->
-  <div class="filters">
-    <span class="filter-label">Filter:</span>
-    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-    <button class="filter-btn" onclick="setFilter('new', this)">New</button>
-    <button class="filter-btn" onclick="setFilter('preparing', this)">Preparing</button>
-    <button class="filter-btn" onclick="setFilter('ready', this)">Ready</button>
-    <button class="filter-btn" onclick="setFilter('picked_up', this)">Picked Up</button>
+<div class="stats-bar">
+  <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Today's Orders</div></div>
+  <div class="stat-card"><div class="stat-num" id="statPending" style="color:var(--orange)">0</div><div class="stat-label">Pending</div></div>
+  <div class="stat-card"><div class="stat-num" id="statConfirmed" style="color:var(--green)">0</div><div class="stat-label">Confirmed</div></div>
+  <div class="stat-card"><div class="stat-num" id="statCancelled" style="color:var(--mist)">0</div><div class="stat-label">Cancelled</div></div>
+  <div class="stat-card"><div class="stat-num" id="statRevenue">$0.00</div><div class="stat-label">Revenue Today</div></div>
+</div>
+
+<div class="filters">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn" onclick="setFilter('pending',this)">Pending</button>
+  <button class="filter-btn" onclick="setFilter('confirmed',this)">Confirmed</button>
+  <button class="filter-btn" onclick="setFilter('cancelled',this)">Cancelled</button>
+  <button class="filter-btn" onclick="setFilter('rejected',this)">Rejected</button>
+</div>
+
+<div class="orders-wrap">
+  <div id="emptyState" class="empty-state">
+    <div class="empty-state-icon">🍜</div>
+    <p>No orders yet.<br>Waiting for customers...</p>
   </div>
+  <div class="orders-grid" id="ordersGrid"></div>
+</div>
 
-  <!-- Orders -->
-  <div class="orders-wrap">
-    <div id="emptyState" class="empty-state">
-      <div class="empty-state-icon">🍜</div>
-      <p>No orders yet.<br>Waiting for customers to place their first order...</p>
-    </div>
-    <div class="orders-grid" id="ordersGrid"></div>
-  </div>
+<div id="toast"><div class="toast-title" id="toastTitle"></div><div id="toastMsg"></div></div>
 
-  <!-- Toast notification -->
-  <div id="toast">
-    <div class="toast-title" id="toastTitle"></div>
-    <div id="toastMsg"></div>
-  </div>
+<script>
+  let allOrders = [];
+  let filter    = 'all';
+  const timers  = {}; // { orderId: { rejectInterval, confirmInterval, selectedMinutes } }
+  const REJECT_SECS = 300; // 5 minutes
 
-  <script>
-    // ─── State ──────────────────────────────────────────────────
-    let allOrders  = [];
-    let filter     = 'all';
+  // ── Load & SSE ──────────────────────────────────────────────
+  async function loadOrders() {
+    try {
+      const data = await (await fetch('/admin/orders')).json();
+      allOrders  = data.orders;
+      renderAll();
+      allOrders.forEach(o => {
+        if (o.status === 'pending')    startRejectTimer(o.order_id, o.received_at);
+        if (o.status === 'confirmed' && o.confirm_minutes && o.confirmed_at)
+          startCookTimer(o.order_id, o.confirm_minutes, o.confirmed_at);
+      });
+    } catch(e) { console.error(e); }
+  }
 
-    // ─── Load existing orders ────────────────────────────────────
-    async function loadOrders() {
-      try {
-        const res  = await fetch('/admin/orders');
-        const data = await res.json();
-        allOrders  = data.orders;
+  function connectSSE() {
+    const es = new EventSource('/admin/stream');
+    es.onopen = () => {
+      document.getElementById('liveDot').classList.remove('offline');
+      document.getElementById('liveStatus').textContent = 'Live';
+    };
+    es.onmessage = (e) => {
+      const p = JSON.parse(e.data);
+      if (p.__type === 'status_update') {
+        const o = allOrders.find(o => o.order_id === p.order_id);
+        if (o) Object.assign(o, { status: p.status, updated_at: p.updated_at, confirm_minutes: p.confirm_minutes || o.confirm_minutes, confirmed_at: p.confirmed_at || o.confirmed_at });
         renderAll();
-      } catch (e) {
-        console.error('Failed to load orders', e);
-      }
-    }
-
-    // ─── SSE — real-time updates ─────────────────────────────────
-    function connectSSE() {
-      const es = new EventSource('/admin/stream');
-
-      es.onopen = () => {
-        document.getElementById('liveDot').classList.remove('offline');
-        document.getElementById('liveStatus').textContent = 'Live';
-      };
-
-      es.onmessage = (e) => {
-        const payload = JSON.parse(e.data);
-
-        if (payload.__type === 'status_update') {
-          // Update existing order status in memory
-          const order = allOrders.find(o => o.order_id === payload.order_id);
-          if (order) {
-            order.status     = payload.status;
-            order.updated_at = payload.updated_at;
-          }
-          renderAll();
-          return;
-        }
-
-        // New order arrived
-        allOrders.unshift(payload);
-        renderAll();
-        showToast(
-          `🍜 New Order — ${payload.order_id}`,
-          `${payload.customer.name} · $${payload.pricing.total.toFixed(2)}`
-        );
-
-        // Play a soft beep if possible
-        try {
-          const ctx = new AudioContext();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.frequency.value = 880;
-          gain.gain.setValueAtTime(0.3, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 0.4);
-        } catch (_) {}
-      };
-
-      es.onerror = () => {
-        document.getElementById('liveDot').classList.add('offline');
-        document.getElementById('liveStatus').textContent = 'Reconnecting...';
-      };
-    }
-
-    // ─── Render ──────────────────────────────────────────────────
-    function renderAll() {
-      updateStats();
-      renderOrders();
-    }
-
-    function updateStats() {
-      const today = new Date().toDateString();
-
-      const todayOrders = allOrders.filter(o =>
-        new Date(o.placed_at || o.received_at).toDateString() === today
-      );
-
-      document.getElementById('statTotal').textContent    = allOrders.length;
-      document.getElementById('statNew').textContent      = allOrders.filter(o => o.status === 'new').length;
-      document.getElementById('statPreparing').textContent= allOrders.filter(o => o.status === 'preparing').length;
-      document.getElementById('statReady').textContent    = allOrders.filter(o => o.status === 'ready').length;
-
-      const revenue = todayOrders
-        .filter(o => o.status !== 'picked_up')
-        .reduce((sum, o) => sum + (o.pricing?.total || 0), 0);
-      document.getElementById('statRevenue').textContent = `$${revenue.toFixed(2)}`;
-    }
-
-    function renderOrders() {
-      const filtered = filter === 'all'
-        ? allOrders
-        : allOrders.filter(o => o.status === filter);
-
-      const grid       = document.getElementById('ordersGrid');
-      const emptyState = document.getElementById('emptyState');
-
-      if (filtered.length === 0) {
-        grid.innerHTML   = '';
-        emptyState.style.display = '';
         return;
       }
+      allOrders.unshift(p);
+      renderAll();
+      startRejectTimer(p.order_id, p.received_at);
+      beep();
+      showToast(`🍜 New Order — ${p.order_id}`, `${p.customer.name} · $${p.pricing.total.toFixed(2)}`);
+    };
+    es.onerror = () => {
+      document.getElementById('liveDot').classList.add('offline');
+      document.getElementById('liveStatus').textContent = 'Reconnecting...';
+    };
+  }
 
-      emptyState.style.display = 'none';
-      grid.innerHTML = filtered.map(order => orderCardHTML(order)).join('');
-    }
+  // ── Reject timer (5 min auto-reject) ────────────────────────
+  function startRejectTimer(orderId, receivedAt) {
+    if (timers[orderId]?.rejectInterval) return;
+    timers[orderId] = timers[orderId] || {};
+    const deadline = new Date(receivedAt).getTime() + REJECT_SECS * 1000;
 
-    function orderCardHTML(order) {
-      const statusLabels = { new: 'New', preparing: 'Preparing', ready: 'Ready for Pick-Up', picked_up: 'Picked Up' };
-      const time = new Date(order.received_at || order.placed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const date = new Date(order.received_at || order.placed_at).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    timers[orderId].rejectInterval = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+      const fill  = document.getElementById(`rf-${orderId}`);
+      const count = document.getElementById(`rc-${orderId}`);
+      if (fill)  fill.style.width  = `${(remaining / REJECT_SECS) * 100}%`;
+      if (count) count.textContent = `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
 
-      const itemsHTML = (order.items || []).map(item => `
-        <div class="order-item-row">
-          <span class="order-item-name">${item.name}</span>
-          <span class="order-item-qty">×${item.qty}</span>
-          <span class="order-item-sub">$${item.subtotal.toFixed(2)}</span>
-        </div>
-      `).join('');
-
-      const notesHTML = order.notes
-        ? `<div class="order-notes">📝 ${order.notes}</div>`
-        : '';
-
-      const btnClass = (status) => {
-        if (order.status !== status) return '';
-        return status === 'new' ? 'active-btn'
-             : status === 'preparing' ? 'active-orange'
-             : status === 'ready'     ? 'active-green'
-             : 'active-grey';
-      };
-
-      return `
-        <div class="order-card status-${order.status}" id="card-${order.order_id}">
-          <div class="order-card-header">
-            <div>
-              <div class="order-id">${order.order_id}</div>
-              <div class="order-time">${date} · ${time}</div>
-            </div>
-            <span class="status-badge ${order.status}">${statusLabels[order.status] || order.status}</span>
-          </div>
-
-          <div class="customer-info">
-            <div class="customer-name">${order.customer.name}</div>
-            <div class="customer-detail">
-              <a href="tel:${order.customer.phone}">📞 ${order.customer.phone}</a><br>
-              <a href="mailto:${order.customer.email}">✉️ ${order.customer.email}</a>
-            </div>
-          </div>
-
-          <div class="order-items">${itemsHTML}</div>
-
-          <div class="order-totals">
-            <div class="order-total-row"><span>Subtotal</span><span>$${order.pricing.subtotal.toFixed(2)}</span></div>
-            <div class="order-total-row"><span>GST</span><span>$${order.pricing.tax.toFixed(2)}</span></div>
-            <div class="order-total-row grand"><span>Total</span><span>$${order.pricing.total.toFixed(2)}</span></div>
-          </div>
-
-          ${notesHTML}
-
-          <div class="status-actions">
-            <button class="status-action-btn ${btnClass('new')}"       onclick="updateStatus('${order.order_id}', 'new')">New</button>
-            <button class="status-action-btn ${btnClass('preparing')}" onclick="updateStatus('${order.order_id}', 'preparing')">Preparing</button>
-            <button class="status-action-btn ${btnClass('ready')}"     onclick="updateStatus('${order.order_id}', 'ready')">Ready</button>
-            <button class="status-action-btn ${btnClass('picked_up')}" onclick="updateStatus('${order.order_id}', 'picked_up')">Picked Up</button>
-          </div>
-        </div>
-      `;
-    }
-
-    // ─── Update Status ────────────────────────────────────────────
-    async function updateStatus(orderId, status) {
-      try {
-        const res = await fetch(`/admin/orders/${orderId}/status`, {
-          method:  'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ status }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          const order = allOrders.find(o => o.order_id === orderId);
-          if (order) order.status = status;
-          renderAll();
-        }
-      } catch (e) {
-        console.error('Failed to update status', e);
+      if (remaining <= 0) {
+        clearInterval(timers[orderId].rejectInterval);
+        const o = allOrders.find(o => o.order_id === orderId);
+        if (o && o.status === 'pending') updateStatus(orderId, 'rejected');
       }
+    }, 1000);
+  }
+
+  // ── Cook timer (countdown after confirm) ────────────────────
+  function startCookTimer(orderId, minutes, confirmedAt) {
+    if (timers[orderId]?.confirmInterval) clearInterval(timers[orderId].confirmInterval);
+    timers[orderId] = timers[orderId] || {};
+    const readyAt = new Date(confirmedAt).getTime() + minutes * 60 * 1000;
+
+    timers[orderId].confirmInterval = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((readyAt - Date.now()) / 1000));
+      const el = document.getElementById(`ct-${orderId}`);
+      if (el) el.textContent = remaining > 0
+        ? `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')} left`
+        : '✅ Ready for pick-up!';
+      if (remaining <= 0) clearInterval(timers[orderId].confirmInterval);
+    }, 1000);
+  }
+
+  // ── Select prep minutes ──────────────────────────────────────
+  function selectMinutes(orderId, min) {
+    timers[orderId] = timers[orderId] || {};
+    timers[orderId].selectedMinutes = min;
+    document.querySelectorAll(`.min-btn[data-oid="${orderId}"]`).forEach(b =>
+      b.classList.toggle('selected', +b.dataset.min === min));
+    const btn = document.getElementById(`cfbtn-${orderId}`);
+    if (btn) btn.disabled = false;
+  }
+
+  // ── Confirm order ────────────────────────────────────────────
+  async function confirmOrder(orderId) {
+    const minutes = timers[orderId]?.selectedMinutes;
+    if (!minutes) return;
+    clearInterval(timers[orderId]?.rejectInterval);
+    const confirmedAt = new Date().toISOString();
+    await updateStatus(orderId, 'confirmed', { confirm_minutes: minutes, confirmed_at: confirmedAt });
+    const o = allOrders.find(o => o.order_id === orderId);
+    if (o) { o.confirm_minutes = minutes; o.confirmed_at = confirmedAt; }
+    renderAll();
+    startCookTimer(orderId, minutes, confirmedAt);
+  }
+
+  // ── Cancel order ─────────────────────────────────────────────
+  async function cancelOrder(orderId) {
+    if (!confirm('Cancel this order? Revenue will not be counted.')) return;
+    clearInterval(timers[orderId]?.rejectInterval);
+    clearInterval(timers[orderId]?.confirmInterval);
+    await updateStatus(orderId, 'cancelled');
+  }
+
+  // ── PATCH status ─────────────────────────────────────────────
+  async function updateStatus(orderId, status, extra = {}) {
+    try {
+      const res  = await fetch(`/admin/orders/${orderId}/status`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, ...extra }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const o = allOrders.find(o => o.order_id === orderId);
+        if (o) Object.assign(o, { status, ...extra });
+        renderAll();
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  // ── Render ───────────────────────────────────────────────────
+  function renderAll() { updateStats(); renderOrders(); }
+
+  function updateStats() {
+    const today = new Date().toDateString();
+    const td    = allOrders.filter(o => new Date(o.placed_at||o.received_at).toDateString() === today);
+    document.getElementById('statTotal').textContent     = td.length;
+    document.getElementById('statPending').textContent   = td.filter(o=>o.status==='pending').length;
+    document.getElementById('statConfirmed').textContent = td.filter(o=>o.status==='confirmed').length;
+    document.getElementById('statCancelled').textContent = td.filter(o=>['cancelled','rejected'].includes(o.status)).length;
+    // Revenue: only confirmed orders count
+    const rev = td.filter(o=>o.status==='confirmed').reduce((s,o)=>s+(o.pricing?.total||0),0);
+    document.getElementById('statRevenue').textContent = `$${rev.toFixed(2)}`;
+  }
+
+  function renderOrders() {
+    const filtered = filter==='all' ? allOrders : allOrders.filter(o=>o.status===filter);
+    const grid  = document.getElementById('ordersGrid');
+    const empty = document.getElementById('emptyState');
+    if (!filtered.length) { grid.innerHTML=''; empty.style.display=''; return; }
+    empty.style.display = 'none';
+    grid.innerHTML = filtered.map(cardHTML).join('');
+    // Re-attach timers after re-render
+    filtered.forEach(o => {
+      if (o.status==='pending') startRejectTimer(o.order_id, o.received_at);
+      if (o.status==='confirmed'&&o.confirm_minutes&&o.confirmed_at)
+        startCookTimer(o.order_id, o.confirm_minutes, o.confirmed_at);
+    });
+  }
+
+  function cardHTML(o) {
+    const id   = o.order_id;
+    const time = new Date(o.received_at||o.placed_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const date = new Date(o.received_at||o.placed_at).toLocaleDateString([],{month:'short',day:'numeric'});
+    const badgeMap  = {pending:'badge-pending',confirmed:'badge-confirmed',cancelled:'badge-cancelled',rejected:'badge-rejected'};
+    const labelMap  = {pending:'Pending',confirmed:'Confirmed',cancelled:'Cancelled',rejected:'Auto-Rejected'};
+
+    const items = (o.items||[]).map(i=>`
+      <div class="order-item-row">
+        <span class="order-item-name">${i.name}</span>
+        <span class="order-item-qty">×${i.qty}</span>
+        <span class="order-item-sub">$${i.subtotal.toFixed(2)}</span>
+      </div>`).join('');
+
+    const notes = o.notes ? `<div class="order-notes">📝 ${o.notes}</div>` : '';
+
+    let actions = '';
+    if (o.status === 'pending') {
+      actions = `
+        <div class="reject-timer">
+          <span class="reject-timer-label">⏳ Auto-reject in</span>
+          <div class="reject-bar-wrap"><div class="reject-bar-fill" id="rf-${id}" style="width:100%"></div></div>
+          <span class="reject-count" id="rc-${id}">5:00</span>
+        </div>
+        <div class="minutes-row">
+          <span class="minutes-label">Prep time:</span>
+          ${[10,15,20,25,30].map(m=>`<button class="min-btn" data-oid="${id}" data-min="${m}" onclick="selectMinutes('${id}',${m})">${m}m</button>`).join('')}
+        </div>
+        <div class="action-row">
+          <button class="btn-confirm" id="cfbtn-${id}" disabled onclick="confirmOrder('${id}')">✓ Confirm Order</button>
+          <button class="btn-cancel" onclick="cancelOrder('${id}')">✕ Cancel</button>
+        </div>`;
+    } else if (o.status === 'confirmed') {
+      actions = `
+        <div class="cook-timer">
+          <span class="cook-timer-label">🍜 Preparing — ready in</span>
+          <span class="cook-timer-count" id="ct-${id}">...</span>
+        </div>
+        <div class="action-row">
+          <button class="btn-cancel" onclick="cancelOrder('${id}')">✕ Cancel Order</button>
+        </div>`;
+    } else if (o.status === 'cancelled') {
+      actions = `<div class="status-note">Order cancelled — not counted in revenue</div>`;
+    } else if (o.status === 'rejected') {
+      actions = `<div class="status-note" style="color:var(--ember)">Auto-rejected — no response within 5 minutes</div>`;
     }
 
-    // ─── Filter ───────────────────────────────────────────────────
-    function setFilter(value, btn) {
-      filter = value;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderOrders();
-    }
+    return `
+      <div class="order-card status-${o.status}" id="card-${id}">
+        <div class="order-card-header">
+          <div><div class="order-id">${id}</div><div class="order-time">${date} · ${time}</div></div>
+          <span class="status-badge ${badgeMap[o.status]||''}">${labelMap[o.status]||o.status}</span>
+        </div>
+        <div class="customer-info">
+          <div class="customer-name">${o.customer.name}</div>
+          <div class="customer-detail">
+            <a href="tel:${o.customer.phone}">📞 ${o.customer.phone}</a><br>
+            <a href="mailto:${o.customer.email}">✉️ ${o.customer.email}</a>
+          </div>
+        </div>
+        <div class="order-items">${items}</div>
+        <div class="order-totals">
+          <div class="order-total-row"><span>Subtotal</span><span>$${o.pricing.subtotal.toFixed(2)}</span></div>
+          <div class="order-total-row"><span>GST</span><span>$${o.pricing.tax.toFixed(2)}</span></div>
+          <div class="order-total-row grand"><span>Total</span><span>$${o.pricing.total.toFixed(2)}</span></div>
+        </div>
+        ${notes}
+        ${actions}
+      </div>`;
+  }
 
-    // ─── Toast ────────────────────────────────────────────────────
-    let toastTimer;
-    function showToast(title, msg) {
-      clearTimeout(toastTimer);
-      document.getElementById('toastTitle').textContent = title;
-      document.getElementById('toastMsg').textContent   = msg;
-      const toast = document.getElementById('toast');
-      toast.style.display = '';
-      toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 5000);
-    }
+  // ── Filter ────────────────────────────────────────────────────
+  function setFilter(v, btn) {
+    filter = v;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderOrders();
+  }
 
-    // ─── Boot ─────────────────────────────────────────────────────
-    loadOrders();
-    connectSSE();
-  </script>
+  // ── Toast ─────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(title, msg) {
+    clearTimeout(toastTimer);
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastMsg').textContent   = msg;
+    const t = document.getElementById('toast');
+    t.style.display = '';
+    toastTimer = setTimeout(()=>t.style.display='none', 6000);
+  }
+
+  // ── Beep ──────────────────────────────────────────────────────
+  function beep() {
+    try {
+      const ctx=new AudioContext(),osc=ctx.createOscillator(),g=ctx.createGain();
+      osc.connect(g);g.connect(ctx.destination);osc.frequency.value=880;
+      g.gain.setValueAtTime(0.3,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.5);
+    } catch(_){}
+  }
+
+  loadOrders();
+  connectSSE();
+</script>
 </body>
 </html>

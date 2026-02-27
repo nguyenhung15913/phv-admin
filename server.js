@@ -43,7 +43,7 @@ app.post('/webhook/orders', (req, res) => {
 
   // 3. Attach a received timestamp
   order.received_at = new Date().toISOString();
-  order.status      = 'new'; // new | preparing | ready | picked_up
+  order.status      = 'pending'; // pending | confirmed | cancelled | rejected
 
   // 4. Store it
   orders.unshift(order); // newest first
@@ -88,9 +88,9 @@ app.get('/admin/orders', (req, res) => {
 // Update order status
 app.patch('/admin/orders/:orderId/status', (req, res) => {
   const { orderId } = req.params;
-  const { status }  = req.body;
+  const { status, confirm_minutes, confirmed_at } = req.body;
 
-  const validStatuses = ['new', 'preparing', 'ready', 'picked_up'];
+  const validStatuses = ['pending', 'confirmed', 'cancelled', 'rejected'];
   if (!validStatuses.includes(status)) {
     return res.status(400).json({ error: `status must be one of: ${validStatuses.join(', ')}` });
   }
@@ -100,9 +100,17 @@ app.patch('/admin/orders/:orderId/status', (req, res) => {
 
   order.status     = status;
   order.updated_at = new Date().toISOString();
+  if (confirm_minutes) order.confirm_minutes = confirm_minutes;
+  if (confirmed_at)    order.confirmed_at    = confirmed_at;
 
-  // Broadcast the status update too
-  broadcastOrder({ __type: 'status_update', order_id: orderId, status, updated_at: order.updated_at });
+  broadcastOrder({
+    __type:          'status_update',
+    order_id:        orderId,
+    status,
+    confirm_minutes: order.confirm_minutes,
+    confirmed_at:    order.confirmed_at,
+    updated_at:      order.updated_at,
+  });
 
   console.log(`🔄 Order ${orderId} → ${status}`);
   res.json({ success: true, order });
